@@ -1,0 +1,14 @@
+# editor / OS
+.DS_Store
+*.swp
+*~
+*.bak
+*.bak.*
+
+# defensive only: live coach data never belongs at the repo root
+/COACH_CONFIG.md
+/GOALS.md
+/HABITS.md
+/STATE.md
+/logs/
+/backups/
