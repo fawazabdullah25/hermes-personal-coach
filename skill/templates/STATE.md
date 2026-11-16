@@ -2,5 +2,14 @@
 - Pending: none
 - Pending Since: none
 - Pending Log: none
+- Pending Question: none
+- Nudged: no
 - Last Routine Run: none
+- Last User Message: never
+- Last User Epoch: 0
+- Silent Cycles: 0
+- Escalation Step: 0
+- Mode: normal
+- Mode Until: none
+- Last Offer: never
 - Test Mode: no

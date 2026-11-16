@@ -12,3 +12,6 @@
 /STATE.md
 /logs/
 /backups/
+
+# written by install.sh in --link mode
+/skill/LOCAL.md

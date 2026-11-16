@@ -1,5 +1,5 @@
 # Habit Ledger
-<--version Edited only by the coach routines. One block per habit. Keys must stay on single lines. -->
+<!-- Edited only by the coach routines. One block per habit. Keys must stay on single lines. -->
 
 ### H1: [Action]
 - Frequency: Daily

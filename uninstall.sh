@@ -47,7 +47,7 @@ have_hermes() { command -v hermes >/dev/null 2>&1; }
 # --- 1. Collect cron IDs from config ----------------------------------------
 IDS=""
 if [ -f "$CONFIG" ]; then
-  IDS="$(grep -E '^- (Morning|Midday|Evening|Daily|Weekly) Cron ID:' "$CONFIG" \
+  IDS="$(grep -E '^- (Morning|Midday|Evening|Daily|Weekly|Nudge AM|Nudge PM) Cron ID:' "$CONFIG" \
         | sed -E 's/^[^:]*:[[:space:]]*//' | grep -v '^none$' || true)"
 fi
 

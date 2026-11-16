@@ -1,10 +1,10 @@
-# Routine: Minimalist Daily Review
+# Routine: Minimalist Daily Check-in
 
 READ: COACH_CONFIG.md → Minimalist Mode.
-1. If `Status: paused` → `(coach paused)`. STOP.
+1. `Status: paused` → `[SILENT]`. STOP.
 2. `plan`     → execute routine-morning.md.
 3. `review`   → execute routine-evening.md.
 4. `combined` → if YLOG exists and its `Evening Score:` is `pending`:
-   set LOG_TARGET = YLOG and execute routine-evening.md steps 3–8 against YLOG
-   (the pending handler will then continue into the morning routine, see
-   pending.md §evening_score note). Else execute routine-morning.md.
+   execute routine-evening.md steps 3–9 against YLOG (Pending Log: YLOG);
+   pending.md §evening_score then continues into the morning routine.
+   Else execute routine-morning.md.

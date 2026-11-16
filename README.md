@@ -1,109 +1,161 @@
 # hermes-personal-coach
 
-An autonomous, psychologically grounded personal coach for
-[Nous Research Hermes Agent](https://github.com/NousResearch/hermes-agent).
+A personal coach for [Nous Research Hermes Agent](https://github.com/NousResearch/hermes-agent)
+that checks in on a schedule, follows up when you go quiet, and tells you
+what it sees.
 
-It runs entirely inside your existing Hermes install — no servers, no
-databases, no accounts. The coach checks in with you on a schedule you choose,
-in whatever chat you already use with Hermes (WhatsApp, Telegram, Discord,
-Slack, the CLI, etc...), and keeps its memory in plain Markdown files you can read
-and edit yourself.
+It runs inside your existing Hermes install — no servers, no accounts. It
+talks to you in the chat you already use (WhatsApp, Telegram, Discord,
+Slack, the CLI…) and keeps its memory in plain Markdown files you can read
+and edit.
+
+> **Status of 2.0.0:** the scripts and installer are tested; the coaching
+> flows have not yet been run end to end on a live Hermes install. Expect
+> rough edges and please report transcripts.
 
 ## What a day looks like
 
 ```
-07:00  Coach:  Morning. What is within your control today?
-               Active: Ship the onboarding flow · Run a 10k
-               Due today: H1 30-min run · H3 Read 10 pages
-               What are your top 1–3 non-negotiables today?
-       You:    1. finish signup form  2. run  3. call mum
-       Coach:  What's the #1 thing likely to derail item 1, and what will
-               you do when it happens? Format: If ___, then I will ___.
+07:00  Coach:  Morning. Coming up: client proposal — in 2d (Thu).
+               Habits: H1 30-min run (day 4)
+               What is the first 5-minute step on the proposal today?
+       You:    outline the pricing section
+       Coach:  What is most likely to derail it, and what will you do
+               then? If ___, then I will ___.
        You:    if slack gets noisy then i will mute it until 11
-       Coach:  Locked. Mute until 11, then ship.
+       Coach:  Locked. Mute until 11, then the outline.
 
-20:30  Coach:  Which did you finish? Reply with numbers and habit IDs,
-               e.g. `1 3 H2`, or `none`.
-       You:    1 3 H1
-       Coach:  Form shipped, mum called, run done. Rate the day 1–5.
+09:00          (no reply to a check-in? on "firm", one lighter follow-up:)
+       Coach:  Still time to pick one thing for today. What is it?
+               "nothing" works too.
+
+20:30  Coach:  Which did you finish? 1 pricing outline · H1 run
+               Reply with numbers and habit IDs, e.g. `1 H1`, or `none`.
+       You:    1 H1
+       Coach:  Outline done, run done. Rate today 1–5 — your effort,
+               not the outcome.
        You:    4
        Coach:  Good day. Tomorrow we go again.
 ```
 
-Miss a habit two days running and the coach doesn't lecture you — it shrinks
-the habit to its 2-minute version until you've won three in a row.
+You don't have to reply in that format. "did the outline, forgot the run,
+maybe a 3.5 — oh and the demo moved to the 14th" sent as a voice note two
+hours later is logged just the same.
 
-## Features
+## What it does
 
-- **GROW onboarding** – ten-minute guided setup: vision → reality → options →
-  this week's commitment. Progress is saved after every question.
-- **Daily WOOP commitments** – 1–3 non-negotiables plus an
-  *if-obstacle-then-action* plan every morning.
-- **Habit streaks with the Two-Day Rule** – first miss is acknowledged
-  neutrally; second consecutive miss triggers automatic scope reduction to a
-  2-minute micro-step; three micro wins scale it back up.
-- **Anti-ghosting** – if you ignore a check-in the coach never nags. The next
-  scheduled check-in adapts (e.g. the evening debrief becomes a single
-  "rate the day 1–5").
-- **Weekly retrospective** – numbers for the week, three reflection questions,
-  OKR status and renegotiation, log archiving.
-- **Three cadences** – intensive (morning / midday / evening), balanced
-  (morning / evening), minimalist (one check-in a day). All include a weekly
-  retro on the day and time you pick.
-- **Four voices** – Stoic Strategist, Drill Sergeant, Empathetic Mentor, or
-  describe your own. Tone only; it never overrides your Hermes persona or
-  safety rules.
-- **Local and private** – everything lives in `~/.hermes/personal-coach/`.
-  Nothing leaves your machine except the LLM calls Hermes already makes.
+**Pushes, at the level you choose**
+
+| Intensity | When a check-in goes unanswered |
+|---|---|
+| `gentle` | Nothing extra. The next check-in gets smaller. |
+| `firm` (default) | One lighter follow-up, then it backs off. After three in a row it asks, once, what's going on. |
+| `relentless` | Firm, then a voice note, then a phone call — inside your call hours, never at night. |
+
+The longer you stay quiet, the *less* it sends. People who fall behind tend
+to avoid looking at their progress, so each step makes the ask smaller
+instead of louder. It never lists what you missed.
+
+**Coaches, at the depth your model can handle**
+
+| Depth | For | Behaviour |
+|---|---|---|
+| `core` | Small local models (about 14B and up) | Short scripted check-ins; numbered, deterministic steps. |
+| `deep` | Large hosted models | Everything in core, plus: candid feedback with evidence, diagnosis when something stalls, pattern reading across your week, planning sit-downs and monthly reviews. |
+
+**Keeps track**
+
+- **Daily plan with an if-then** – the morning question is built from your
+  nearest real deadline; you add one obstacle plan.
+- **Habits that shrink instead of breaking** – miss twice and the habit
+  drops to its 2-minute version until you've won three in a row. Prefer no
+  numbers at all? `coach style minimum`.
+- **Commitments in one place** – exams, deadlines and promises live in one
+  table with dates. Past your cap, the coach asks what the new one replaces.
+- **Weekly review in two questions** – an execution score (done ÷ planned),
+  what improved, what to change. Key results are reviewed monthly.
+- **A coaching contract** – dated rules about what works for you and what
+  doesn't. Tell it "stop asking me X" and it writes that down and obeys it.
+- **Rest and crunch modes** – a score-only week when you're ill or
+  travelling; a narrowed focus when a deadline is close.
+
+**Connects to the rest of your setup** (all optional, off by default)
+
+| Integration | What it adds |
+|---|---|
+| Calendar | Deadlines become events with reminders; mornings know your schedule. |
+| Voice notes | Spoken check-ins; answer by voice. |
+| Phone calls | A real call when texts go unanswered. |
+| Photo proof | Send a picture of the finished thing. |
+| Accountability partner | A weekly scorecard to someone you choose. |
+| Stakes | A pledge you set and carry out if you miss your target. |
+| Others | Notes apps, fitness data, GitHub activity, lights, music, webhooks. |
+
+The coach suggests at most one of these per fortnight, when your own usage
+shows a need for it, and stops for good if you say `never`. At setup you
+choose whether it performs setup steps itself (asking before each one) or
+writes them out for you to run — useful when the agent is sandboxed and
+cannot reach its own configuration. Nothing counts as "on" until a real
+test passes.
 
 ## Requirements
 
-- Hermes Agent **0.21.0 or later** (tested on 0.21.0). The skill needs the
-  `cronjob_manage` tool with `attach_to_session` support, the terminal tool,
-  and file read/write.
-- A model that follows multi-step tool instructions reliably:
-  - **Recommended floor: a 14B-class instruct model.**
-  - 8B models work best-effort — always use the `/personal-coach …` slash
-    commands rather than plain text, and expect the occasional retry.
-  - 32B+ and hosted frontier models are comfortable.
-- Bash 3.2+ and coreutils for the install scripts (macOS and Linux).
+- Hermes Agent **0.21.0 or later**, with the cron tool (`cronjob_manage`
+  with `attach_to_session`), the terminal tool, and file read/write.
+- A model that follows multi-step tool instructions:
+  - `core` depth: a 14B-class instruct model is the recommended floor;
+    smaller models are best-effort — use the slash commands.
+  - `deep` depth: a large hosted model.
+- Bash 3.2+ and coreutils (macOS and Linux).
 
 ## Install
 
 ```bash
 git clone https://github.com/fawazabdullah25/hermes-personal-coach.git
-cd hermes-personal-coach
-./install.sh            # or: bash install.sh
-hermes gateway restart  # required so the gateway registers the new command
 ```
 
-`install.sh` copies the skill to `~/.hermes/skills/personal-coach/` and creates
-an empty data directory at `~/.hermes/personal-coach/`. It never touches
-`SOUL.md`, `config.yaml`, `MEMORY.md`, credentials, or other skills.
+```bash
+cd hermes-personal-coach && ./install.sh
+```
 
-Developers can symlink instead of copying with `./install.sh --link`; user
-data still lives outside the repo, so `git status` never shows it.
+```bash
+hermes gateway restart
+```
 
-Verify: send `/commands` in your chat and page through until you see
-`/personal-coach`.
+`install.sh` copies the skill to `~/.hermes/skills/personal-coach/`, creates
+the data directory at `~/.hermes/personal-coach/`, and records that
+directory's absolute path for the skill. It never touches `SOUL.md`,
+`config.yaml`, `MEMORY.md`, credentials or other skills.
+
+Developers can symlink instead of copying with `./install.sh --link`.
+
+Verify: send `/commands` in your chat and look for `/personal-coach`.
+
+### Docker and sandboxes
+
+If your agent's terminal runs in Docker or another sandbox, `~` inside it
+can be a throwaway copy, and anything the coach writes there is lost. Mount
+the data directory into the sandbox **at the same absolute path** it has on
+the host (for the Docker backend, a `docker_volumes` entry in Hermes
+`config.yaml`), then run `install.sh` on the host. Setup checks that a
+write survives and stops with a clear message if it doesn't.
 
 ## Quickstart
 
-> **Run setup from the chat where you want the check-ins delivered.**
-> Cron jobs post back to the chat that created them.
+> **Run setup from the chat where you want the check-ins.** Cron jobs post
+> back to the chat that created them.
 
-1. Send `/personal-coach setup` (plain `coach setup` also works on most models).
-2. Answer one question at a time:
-   1. Confirm your clock and time zone, and which day your week starts.
-   2. Pick a cadence and enter times as 24-hour `HH:MM`.
-   3. Pick a voice.
-   4. Give 1–3 long-term outcomes, one sprint objective (4–12 weeks) with
-      1–3 key results (the coach proposes each KR in a fill-in shape — just
-      say `accept` or send your own version), and up to 5 habits with a
-      trigger and a 2-minute fallback each.
-3. The coach registers its cron jobs, verifies the scheduler shows the right
-   next-run time, and tells you when the first check-in arrives.
-4. Try it immediately: `/personal-coach test morning` (dry run, nothing saved).
+1. Send `/personal-coach setup` (plain `coach setup` works on most models).
+2. Answer one question at a time — about five minutes:
+   clock and week start → how often and when → voice and intensity → one
+   goal for the next 4–12 weeks with a key result → up to three habits →
+   any fixed dates this month → coaching depth and who performs setup steps.
+3. The coach registers its cron jobs, checks the scheduler's clock, and
+   tells you when the first check-in arrives.
+4. Try it now: `/personal-coach test morning` (dry run, nothing saved).
+
+Longer-term vision, more objectives and a full roadmap come later, with
+`coach plan`, once the daily rhythm is working.
 
 ## Commands
 
@@ -111,38 +163,45 @@ Use `/personal-coach <command>` (reliable on every model) or `coach <command>`.
 
 | Command | What it does |
 |---|---|
-| `setup` | Runs or resumes the onboarding wizard. If already set up, offers `redo` (re-creates cron jobs; backs up `GOALS.md`) or `keep`. |
-| `status` | Active OKRs, today's commitments, habit streaks and scope, each cron job's health (found / missing, next run). |
-| `test morning` \| `pulse` \| `evening` \| `weekly` \| `daily` | Simulates that check-in now. Dry run: prefixed `[TEST — nothing saved]`, writes nothing. |
-| `timezone` | Re-reads the system clock and rewrites the cron schedules in place (job IDs unchanged). Use after DST changes or travel. |
-| `pause` / `resume` | Pauses/resumes every coach cron job in Hermes and records the state. No messages arrive while paused. |
-| `teardown` | Removes all coach cron jobs. Goals and logs stay on disk. |
-| `help` | Lists these commands. |
-| `edit` (natural language) | "move my evening debrief to 21:00", "add habit: stretch daily, after coffee, micro: 1 stretch", "back to full H2". The coach shows the exact line change and asks `yes/no` before writing. |
+| `setup` | Runs or resumes onboarding. After an upgrade it asks only the new questions. |
+| `status` | Settings, cron health, today's plan, commitments due this week, key results, habits. |
+| `test morning` \| `pulse` \| `evening` \| `weekly` \| `daily` \| `nudge` | Dry-runs that check-in. Writes nothing. |
+| `intensity gentle` \| `firm` \| `relentless` | How hard it follows up. |
+| `depth core` \| `deep` | Scripted check-ins, or full coaching. |
+| `style streaks` \| `minimum` | Show running streaks, or one small daily minimum with no numbers. |
+| `mode rest [days]` \| `crunch [days] <target>` \| `normal` | Lighter weeks and deadline weeks. |
+| `commit add <what> <date>` \| `done C3` \| `drop C3` \| `defer C3 <date>` \| `list` | Dated commitments. |
+| `cap <n>` | How many open commitments before the coach asks what a new one replaces. |
+| `remind <when> <what>` | A one-off reminder (calendar event if connected, else a one-shot job). |
+| `contract` | Show or change the rules you've given the coach. |
+| `integrations [name]` | Connect calendar, voice, calls and more; `integrations offers off` stops suggestions. |
+| `partner` / `stake` | Accountability partner; a pledge on your weekly target. |
+| `review` / `plan` | Monthly or end-of-sprint review; a planning sit-down (deep depth). |
+| `timezone` | Re-reads the clock and rewrites schedules. Use after travel or DST. |
+| `pause` / `resume` | Stops and restarts all coach jobs. |
+| `teardown` | Removes all coach cron jobs. Data stays. |
+| `edit …` | "move my evening check-in to 21:00", "add habit: stretch daily, after coffee, micro: 1 stretch". Confirms before writing. |
+| `help` | Lists commands. |
 
-You can also just talk to it: "what should I focus on today?", "I'm stuck on
-KR 1.2". Those turns read your files but never write them.
+## Cadence
 
-## Cadence tiers
-
-| Tier | Check-ins | Times you provide |
-|---|---|---|
-| intensive | morning kickoff · midday pulse · evening debrief · weekly retro | wake, bed, morning, midday, evening, weekly day+time |
-| balanced | morning kickoff · evening debrief · weekly retro | wake, bed, morning, evening, weekly day+time |
-| minimalist | one daily check-in · weekly retro | wake, bed, daily time, weekly day+time, and a mode: `plan` (morning planning), `review` (evening review), or `combined` (morning: review yesterday + plan today) |
+| Tier | Check-ins |
+|---|---|
+| balanced (recommended) | morning plan · evening review · weekly review |
+| minimalist | one check-in a day (`plan`, `review` or `combined`) · weekly review |
+| intensive | morning · midday · evening · weekly — best for a short push; most people drop three a day within a week |
 
 ## Voices
 
 | Voice | Style |
 |---|---|
-| Stoic Strategist | Calm, precise, focused on what you control and on deep work. |
-| Drill Sergeant | Short sentences, urgent, zero excuses — but never insults. |
-| Empathetic Mentor | Warm, reflective, names feelings, psychologically safe. |
-| Custom | You describe tone, humour and toughness in 2–3 sentences. |
+| Stoic Strategist | Calm, precise, focused on what you control. |
+| Drill Sergeant | Short, urgent, zero excuses — and zero insults. |
+| Empathetic Mentor | Warm, reflective, names feelings. |
+| Custom | You describe tone, humour and toughness. |
 
-All voices share hard rules: no sarcasm about failures, never moralise a
-miss, at most two sentences of personality per message, and they never
-override your `SOUL.md` or Hermes safety behaviour.
+Voice changes wording only. How often the coach follows up comes from
+intensity, so a Drill Sergeant on `gentle` still leaves you alone.
 
 ## How it works
 
@@ -150,71 +209,74 @@ override your `SOUL.md` or Hermes safety behaviour.
 
 | Path | Contents | Owner |
 |---|---|---|
-| `~/.hermes/skills/personal-coach/` | Code: `SKILL.md`, `references/`, `templates/` | Replaced on upgrade. The agent never writes here. |
-| `~/.hermes/personal-coach/` | Data: `COACH_CONFIG.md`, `GOALS.md`, `HABITS.md`, `STATE.md`, `logs/`, `backups/` | Yours. Survives upgrade and uninstall (unless you choose to purge). |
+| `~/.hermes/skills/personal-coach/` | Code: `SKILL.md`, `references/`, `templates/`, `scripts/` | Replaced on upgrade. |
+| `~/.hermes/personal-coach/` | Your data | Yours. Survives upgrade and uninstall. |
 
 ### Data files (all Markdown, all editable by hand)
 
-- `COACH_CONFIG.md` — status, time zone, cadence, times, voice, registered cron IDs.
-- `GOALS.md` — §1 vision & roadmap milestones (never archived), §2 active OKRs
-  with status, §3 habits with trigger and micro-step, §4 constraints, §5 archive.
-- `HABITS.md` — the habit ledger: streak, consecutive misses, scope
-  (`full`/`micro`), micro completions. Updated by the evening routine.
-- `STATE.md` — five lines: what question is currently pending, since when,
-  and whether test mode is on.
-- `logs/YYYY-MM-DD.md` — one file per day: commitments + WOOP plan, habits
-  due, midday status, evening completions, wins, obstacles, 1–5 score.
-- `logs/weekly/YYYY-Www.md` — weekly rollups (kept forever).
-- `logs/archive/` — daily logs older than 56 days, moved there by the weekly
-  retro. Long roadmaps are unaffected: milestones live in `GOALS.md §1` and
-  are surfaced when they come within a month.
-- `backups/` — a copy of `GOALS.md` before every weekly edit and before `redo`.
+- `COACH_CONFIG.md` — schedule, voice, intensity, depth, integrations, cron IDs.
+- `GOALS.md` — vision and milestones, objectives and key results, habits,
+  constraints and your "why", archive.
+- `HABITS.md` — the habit ledger: streak, scope (`full`/`micro`), last done.
+- `COMMITMENTS.md` — one table of dated commitments.
+- `CONTRACT.md` — how you want to be coached; newest dated line wins.
+- `STATE.md` — the open question, when you last wrote, the current mode.
+- `logs/YYYY-MM-DD.md` — the day: plan, if-then, habits, completions, score,
+  notes captured from chat.
+- `logs/weekly/YYYY-Www.md` — weekly rollups, kept forever.
+- `logs/archive/` — daily logs older than 56 days.
+- `briefs/` — setup instructions the coach wrote for you.
+- `docs/` — review notes, plans, research.
+- `bin/coach.sh` — the helper script (replaced on upgrade).
 
 ### Routing
 
-`SKILL.md` is a small router (about 900 tokens). It dispatches to exactly one
-reference file per turn — onboarding, one of the routines, the command
-handler, or the pending-reply handler — so even small models see only the
-algorithm they need. Every reference file is a numbered, if/else algorithm
-with one question per message and explicit WRITE steps.
+`SKILL.md` is a small router. Each turn loads exactly one reference file —
+onboarding, a routine, a command handler or the reply handler — so small
+models see only the algorithm they need. Deep-mode files load only when
+`Depth: deep`.
+
+Date arithmetic, silence detection and weekly statistics are done by
+`bin/coach.sh`, not by the model.
 
 ### Cron
 
 Each check-in is a native Hermes cron job named `coach-morning`,
-`coach-midday`, `coach-evening`, `coach-daily`, or `coach-weekly`, created
-with a 5-field cron expression, `skills=["personal-coach"]`, and
-`attach_to_session=true`. The job's prompt names the exact reference file to
-execute. Because it was created from your chat, its output is delivered
-there, and your reply continues the same session.
+`coach-midday`, `coach-evening`, `coach-daily` or `coach-weekly`. On `firm`
+and `relentless` there are also `coach-nudge-am` and `coach-nudge-pm`, which
+fire once after a check-in and stay silent unless it went unanswered. Every
+routine is idempotent: fired late or twice, it replies `[SILENT]`, which
+Hermes does not deliver.
 
-If your gateway is configured to start fresh sessions periodically, replies
-still work: every check-in records what it asked in `STATE.md`, and the
-router checks that first on every message.
+## Safety
 
-Every routine is idempotent — if the scheduler fires late or twice (after a
-reboot, for example) it detects that the step is already done and stays quiet.
-The coach never creates extra reminder jobs.
+The coach is not a therapist or a doctor. If you say something that sounds
+like a crisis, it stops coaching, points you to emergency and crisis
+services, and switches to rest mode. Set a local number with the
+`Crisis Line` line in `COACH_CONFIG.md`.
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---|---|
-| `/personal-coach` not in `/commands` | Run `hermes gateway restart`. Then check `ls ~/.hermes/skills/personal-coach/SKILL.md` exists. |
-| Check-ins arrive in the wrong chat / not at all | They go to the chat that ran setup. Open the chat you want, run `/personal-coach teardown`, then `/personal-coach setup` → `redo`. |
-| Check-ins arrive at the wrong hour | `/personal-coach timezone`. If still wrong, tell the coach "the morning check-in arrived at 06:00" — it stores an offset and rewrites the schedules. |
-| `status` shows a cron job as MISSING | `/personal-coach timezone` re-creates missing jobs. `hermes cron doctor` and `hermes cron list` show the scheduler's view. |
-| Coach answered "4 what?" to a rating | Your session was reset between check-in and reply. Send `/personal-coach status` once (this loads the skill), then repeat the rating. On small models prefer the slash command for every interaction. |
-| Duplicate morning messages | Run `/personal-coach status`; if two jobs share a name, `/personal-coach setup` → `redo` removes all `coach-*` jobs and re-creates them. |
-| Coach sent a file instead of text | A bare file path in its reply — please open an issue with the message; paths must be in backticks. |
-| I want quiet for a while | `/personal-coach pause`, later `/personal-coach resume`. Nothing fires while paused and no streaks are penalised for days without a log. |
-| Setup got interrupted | Send `/personal-coach setup` — it resumes at the saved step. |
-| I edited `GOALS.md` by hand | Fine. If you changed habits, send `coach edit rebuild habits` so the ledger is regenerated. Keep the line shapes shown in the file. |
+| `/personal-coach` not in `/commands` | `hermes gateway restart`; check `~/.hermes/skills/personal-coach/SKILL.md` exists. |
+| Answers aren't remembered; setup restarts | Sandbox write problem — see "Docker and sandboxes". |
+| Check-ins arrive in the wrong chat | Open the right chat: `/personal-coach teardown`, then `/personal-coach setup` → `redo`. |
+| Check-ins arrive at the wrong hour | `/personal-coach timezone`. |
+| `status` shows a job MISSING or failing | `/personal-coach timezone` re-creates missing jobs; `hermes cron list` shows the scheduler's view. A failing job usually means the model provider errored. |
+| No follow-ups arrive | Intensity is `gentle`, or you answered, or you'd already been quiet for a while (it backs off). `/personal-coach test nudge` explains. |
+| Calls or calendar work in chat but not in check-ins | Scheduled runs have a restricted tool list. Run `coach integrations <name>` again; it adds the toolset to the jobs. |
+| Too many messages | `coach intensity gentle`, a lighter cadence via `coach edit`, or `coach mode rest 7`. |
+| Coach sent a file instead of text | A bare file path in its reply — please open an issue with the message. |
+| Setup got interrupted | `/personal-coach setup` resumes at the saved step. |
+| I edited `GOALS.md` by hand | Fine. If you changed habits, send `coach edit rebuild habits`. |
 
 ## Privacy
 
-All coaching data is plain text under `~/.hermes/personal-coach/` with
-`0700` permissions. The skill makes no network calls of its own. Delete the
-directory and it's gone.
+Everything is plain text under `~/.hermes/personal-coach/` with `0700`
+permissions. The skill makes no network calls of its own; integrations you
+switch on use the tools you connect. Secrets are never written to the data
+directory. Delete the directory and it's gone.
 
 ## Upgrade
 
@@ -222,33 +284,40 @@ directory and it's gone.
 cd hermes-personal-coach && git pull && ./install.sh && hermes gateway restart
 ```
 
-Code is replaced; the previous install is kept as
-`~/.hermes/skills/personal-coach.bak.<timestamp>`; data is untouched. If a
-release changes a data schema, `install.sh` migrates it and `CHANGELOG.md`
-says so.
+Code is replaced (the previous install is kept as
+`personal-coach.bak.<timestamp>`); data is untouched; missing settings are
+added with their defaults.
+
+**From 1.x:** then send `/personal-coach setup` once. It keeps your goals,
+habits and logs, asks three new questions, and re-registers the cron jobs.
+1.x behaviour is closest to `intensity gentle` + `depth core` + `style
+streaks`. See `CHANGELOG.md`.
 
 ## Uninstall
 
 ```bash
-./uninstall.sh                # removes cron jobs via `hermes cron`, then the code; asks about data
-./uninstall.sh --keep-data    # never prompts about data
-./uninstall.sh -y --purge-data
+./uninstall.sh
 ```
 
-If a cron job cannot be removed the script stops and asks you to run
-`/personal-coach teardown` first (or `--force`).
+Removes the cron jobs, then the code, and asks about your data
+(`--keep-data`, `--purge-data`, `-y`). If a job cannot be removed, run
+`/personal-coach teardown` first, or pass `--force`.
 
 ## Renaming the command to `/coach`
 
-The slash command is the skill's directory name. To get `/coach`:
-`SKILL_NAME="coach"` in `install.sh` and `uninstall.sh`, `name: coach` in
-`skill/SKILL.md`, then reinstall and `hermes gateway restart`. Data stays at
+Set `SKILL_NAME="coach"` in `install.sh` and `uninstall.sh` and `name: coach`
+in `skill/SKILL.md`, reinstall, and restart the gateway. Data then lives at
 `~/.hermes/coach/`.
+
+## Why it works this way
+
+`docs/RESEARCH.md` lists the research, coaching practice and field
+experience behind each behaviour, and how strong the evidence is.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). New voices, better prompts for small
-local models, and integrations are especially welcome.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Transcripts from real installs —
+especially small local models — are the most useful contribution right now.
 
 ## License
 

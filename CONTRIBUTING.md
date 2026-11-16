@@ -5,27 +5,38 @@ small local models, so most rules below exist to protect that.
 
 ## Ground rules
 
-1. **Budgets.** `skill/SKILL.md` ≤ 900 tokens. Each file in
-   `skill/references/` ≤ 1,300 tokens and ≤ 12 numbered steps per algorithm.
-   `tests/lint.sh` checks word counts as a proxy (≈ 650 and 950 words).
-2. **Deterministic algorithms.** Instructions are numbered, imperative steps
-   with explicit `If … → … Else → …`. No "consider", "you may", "use judgement".
-3. **One question per message.** Every routine and handler asks at most one
-   thing, writes its state, then stops.
-4. **Write before reply.** Any step that changes state says `WRITE <file>`
-   before the message is composed. State is always re-derived from files,
-   never from conversation memory.
-5. **Files.** The agent writes only under `~/.hermes/personal-coach/`. New
-   files need a template in `skill/templates/` and a schema note in the README.
-6. **Cron.** Jobs are created, updated, paused, resumed, and removed only in
-   `references/cron-engine.md`. Never add one-off reminder jobs anywhere.
-7. **Paths in user-facing text must be in backticks.** Hermes sends a bare
-   path of an existing file as an attachment. This includes the frontmatter
-   `description`.
-8. **Frontmatter `description`** stays two sentences: one for humans (it is
-   shown in `/commands`), one with trigger keywords for the model. No paths.
-9. **Non-destructive.** Nothing may read or write `~/.hermes/SOUL.md`,
-   `config.yaml`, `MEMORY.md`, `USER.md`, or other skills.
+1. **Two layers.** Core files are read by small models on every run and
+   must stay small and deterministic. Extended files (`deep-coaching.md`,
+   `deep-sessions.md`, `integrations.md`) load rarely and may use judgement.
+   Budgets, checked by `tests/lint.sh` as word counts: `SKILL.md` ≤ 900
+   words; core references ≤ 950; extended references ≤ 1,500.
+2. **Deterministic core.** Core instructions are numbered, imperative steps
+   with explicit `If … → … Else → …`. No "consider" or "use judgement"
+   outside the extended files.
+3. **One question per check-in.** Every routine and reply handler asks at
+   most one thing, writes its state, then stops. Conversations the user
+   starts in deep mode may ask several numbered questions.
+4. **Write before reply.** State is re-derived from files, never from
+   conversation memory.
+5. **Scripts do the arithmetic.** Dates, time windows and statistics belong
+   in `skill/scripts/coach.sh`, not in prose the model must compute.
+6. **No guilt.** No user-facing string may list misses, broken streaks or
+   unanswered check-ins. Escalation makes the ask smaller and changes the
+   channel; it never adds volume. Lint checks the obvious phrasings.
+7. **Files.** The agent writes only under the data directory. The one
+   exception is integration setup, behind an explicit `yes` per step. New
+   data files need a template and a README note.
+8. **Cron.** Jobs are created, updated and removed only in
+   `references/cron-engine.md`. Scheduled runs cannot create jobs, so
+   follow-ups are fixed jobs that reply `[SILENT]` when not needed.
+9. **Personal rules go in `CONTRACT.md`,** never in the skill. A change
+   that only suits one person is a contract line, not a pull request.
+10. **Paths in user-facing text must be in backticks,** including the
+    frontmatter `description`. Hermes sends a bare path as an attachment.
+11. **Evidence.** A behaviour change should cite research, a transcript, or
+    both, and `docs/RESEARCH.md` should say how strong the support is.
+12. **Opt-in for anything that reaches outward** — other people, money,
+    phone calls, the user's accounts.
 
 Run `tests/lint.sh` before opening a PR.
 
@@ -78,15 +89,14 @@ Add one block to `references/archetypes.md`:
   never moralise a miss, ≤ 2 sentences of personality per message).
 - Add the option to `references/onboarding.md` Step 3 and the README table.
 
-### 4. Integrations (calendar, health data, task managers, …)
-Generic pattern, so integrations stay optional and small-model-safe:
-- One reference file per integration, e.g. `references/integration-calendar.md`.
-- Enabled by a config line `Integration: calendar = on` (default `off`) added
-  to `COACH_CONFIG.md` by the integration's own setup step, never by the main
-  onboarding.
-- Invoked from exactly one routine step guarded by that flag.
-- Must be a no-op when the flag is off or the tool/skill it needs is absent.
-- Must not add more than one question to any routine.
+### 4. Integrations
+- Add a row to the catalogue in `references/integrations.md`, a rule in
+  §Offer only if a clear usage signal exists, and a test in §Verify.
+- Add a config flag (default `off`) to `templates/COACH_CONFIG.md`.
+- Use it from exactly one routine step guarded by that flag, and make that
+  step a silent no-op when the flag is off or the tool errors.
+- Name only skills, tools and commands you have verified in the Hermes docs
+  or a live install.
 
 ### 5. Schema changes
 - Bump `VERSION` and the `Version` line in `templates/COACH_CONFIG.md`.
@@ -97,7 +107,7 @@ Generic pattern, so integrations stay optional and small-model-safe:
 ## Pull request checklist
 
 - [ ] `tests/lint.sh` passes
-- [ ] Budgets respected (SKILL.md ≤ 900 tokens, references ≤ 1,300)
+- [ ] Budgets respected (see ground rule 1)
 - [ ] One question per message preserved
 - [ ] No bare paths in user-facing text
 - [ ] Tested on at least two model sizes; transcripts attached

@@ -1,17 +1,17 @@
 # Routine: Midday Pulse
 
-READ: COACH_CONFIG.md, STATE.md, LOG (create if missing).
+READ: COACH_CONFIG.md, STATE.md, CONTRACT.md, LOG (create if missing).
 
-1. If `Status: paused` → `(coach paused)`. STOP.
-2. If LOG `Midday Friction Pulse → Status:` ≠ `pending` and CRON RUN → reply
-   `(pulse already logged)`. STOP.
-3. If `Pending:` is `morning_commitments` or `morning_woop` (morning was never
-   answered): compose: "Midday, and no plan yet — that happens. Give me ONE
-   thing you'll finish before evening." Pending: morning_commitments (unchanged)
-   and go to step 6.
-4. Else if commitments exist: compose (≤ 60 words): "Midday pulse. Reply
-   `on-track`, `blocked`, or `reduced` — add one line if blocked."
-5. Else (log has no commitments, morning routine never ran): same as step 3.
-6. WRITE STATE.md: Pending: midday_status (unless step 3/5 kept
-   morning_commitments); Last Routine Run: midday TODAY.
-7. Send. Answer handled by pending.md.
+1. `protocols.md` §Open.
+2. LOG `Midday Friction Pulse → Status:` ≠ `pending` and CRON RUN →
+   `[SILENT]`. STOP.
+3. S ≥ 1 or `Mode` ≠ normal → `[SILENT]`. STOP. (Midday never escalates.)
+4. LOG has no commitment text → compose: "Midday. Give me ONE thing you'll
+   finish before evening — or `nothing`." WRITE Pending:
+   morning_commitments; `Morning Reply: pending`. Go to step 6.
+5. Else compose (≤ 50 words): name commitment 1 in the user's own words,
+   then "Reply `on-track`, `not yet`, or `blocked` — add a line if blocked."
+   WRITE Pending: midday_status; LOG `Midday Reply: pending`.
+6. WRITE STATE Pending Since: TODAY NOW; Pending Log: LOG; Last Routine Run:
+   midday TODAY.
+7. Send. The answer is handled by pending.md.

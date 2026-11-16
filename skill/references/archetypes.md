@@ -21,3 +21,9 @@ is information, not a verdict. We shrink it and go again."
 
 ## Custom
 Use `Archetype Prompt` from config as the style guide; apply Common rules.
+
+## Voice is not intensity
+The voice sets wording. How often you follow up comes only from `Intensity`
+(`escalation.md`); a Drill Sergeant on `gentle` still sends no follow-ups,
+and an Empathetic Mentor on `relentless` still calls. A dated line in
+`CONTRACT.md` overrides a phrase bank line.
